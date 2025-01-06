@@ -1,0 +1,5 @@
+node_modules
+postgres-auth/
+prisma/
+.env
+package-lock.json
