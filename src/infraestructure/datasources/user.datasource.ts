@@ -7,7 +7,7 @@ import type { LoginUserDto } from "../../domain/dtos/auth/login.dto";
 
 export class AuthDatasourceImpl implements AuthDatasource {
   async findUser(username: string) {
-    const userExists = await prisma.user.findUnique({
+    const userExists = await prisma.user.findFirst({
       where: { username },
     });
 
@@ -22,7 +22,14 @@ export class AuthDatasourceImpl implements AuthDatasource {
 
     const { username, password } = registerUserDto;
     const user = await prisma.user.create({
-      data: { username, password: await BcryptAdapter.hash(password) },
+      data: {
+        username,
+        password: await BcryptAdapter.hash(password),
+        email: "",
+        provider: "",
+        providerId: "",
+        token: "",
+      },
     });
 
     return user;

@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import cookieParser from "cookie-parser";
+import passport from "passport";
 
 export class Server {
   public app = express();
@@ -11,6 +12,7 @@ export class Server {
     this.configViewEngine();
     this.app.use(express.json());
     this.app.use(cookieParser());
+    this.app.use(passport.initialize());
 
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(this.routes);
