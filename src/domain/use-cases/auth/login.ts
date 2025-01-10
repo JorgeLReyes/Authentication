@@ -2,7 +2,7 @@ import { AuthRepository } from "../../repositories/user.repository";
 import { CustomError } from "../../../config/error";
 import { fromUser } from "../../../infraestructure/mappers/user.mapper";
 import { RequestBody } from "../../../types";
-import { LoginUserDto } from "../../dtos/auth/login.dto";
+import { LoginUserDto } from "../../dtos/auth/login-user.dto";
 import { JWTAdapter } from "../../../config/jwt";
 
 export class LoginUser {

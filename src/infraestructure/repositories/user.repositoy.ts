@@ -1,15 +1,14 @@
 import { AuthDatasource } from "../../domain/datasources/datasource";
-import { LoginUserDto } from "../../domain/dtos/auth/login.dto";
-import type { RegisterUserDto } from "../../domain/dtos/auth/register.dto";
 import { AuthRepository } from "../../domain/repositories/user.repository";
+import { UserDto } from "../../types";
 
 export class AuthRepositoryImpl implements AuthRepository {
   constructor(private authDatasource: AuthDatasource) {}
 
-  async create(registerUserDto: RegisterUserDto) {
+  async create(registerUserDto: UserDto) {
     return this.authDatasource.create(registerUserDto);
   }
-  login(loginUserDto: LoginUserDto) {
+  login(loginUserDto: UserDto) {
     return this.authDatasource.login(loginUserDto);
   }
 }

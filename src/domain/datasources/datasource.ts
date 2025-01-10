@@ -1,7 +1,6 @@
-import type { LoginUserDto } from "../dtos/auth/login.dto";
-import type { RegisterUserDto } from "../dtos/auth/register.dto";
+import { UserDto } from "../../types";
 
 export abstract class AuthDatasource {
-  abstract create(registerUserDto: RegisterUserDto): any;
-  abstract login(loginUserDto: LoginUserDto): any;
+  abstract create(registerUserDto: UserDto): any;
+  abstract login(loginUserDto: UserDto): any;
 }

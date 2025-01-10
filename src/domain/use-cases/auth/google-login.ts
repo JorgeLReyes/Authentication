@@ -4,7 +4,7 @@ import { fromUser } from "../../../infraestructure/mappers/user.mapper";
 import { RequestBody } from "../../../types";
 import { RegisterUserDto } from "../../dtos/auth/register-user.dto";
 
-export class CreateUser {
+export class GoogleLoginUser {
   constructor(private repository: AuthRepository, private data: RequestBody) {}
   async execute() {
     const [error, dataDto] = RegisterUserDto.create(this.data);

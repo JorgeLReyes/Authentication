@@ -1,15 +1,20 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { CreateUser } from "../../../domain/use-cases/auth/register";
 import { AuthRepository } from "../../../domain/repositories/user.repository";
 import { CustomError } from "../../../config/error";
 import { LoginUser } from "../../../domain/use-cases/auth/login";
 import { configCookies } from "../../../config/cookies";
+import { RedirectToGoogleAuth } from "../../../domain/use-cases/auth/redirect-google-auth";
+import { CallbackGoogleAuth } from "../../../domain/use-cases/auth/callback-google-auth";
+import { GoogleAuthService } from "../../services/auth/google.service";
 
 export class AuthController {
-  constructor(private repository: AuthRepository) {}
+  constructor(
+    private repository: AuthRepository,
+    private service: GoogleAuthService
+  ) {}
 
   private handleError = (res: Response, error: unknown) => {
-    // console.log(error);
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({
         error: error.message,
@@ -31,6 +36,26 @@ export class AuthController {
         const { token } = user;
         res.cookie("access_token", token, configCookies).json(user);
       })
+      .catch((error) => this.handleError(res, error));
+  };
+
+  loginGoogle = (req: Request, res: Response, next: NextFunction) => {
+    res.cookie("x-strategy", "login");
+    this.redirectToGoogle(req, res, next);
+  };
+
+  registerGoogle = (req: Request, res: Response, next: NextFunction) => {
+    res.cookie("x-strategy", "register");
+    this.redirectToGoogle(req, res, next);
+  };
+
+  redirectToGoogle = (req: Request, res: Response, next: NextFunction) => {
+    new RedirectToGoogleAuth().execute(req, res, next);
+  };
+
+  callbackGoogle = (req: Request, res: Response, next: NextFunction) => {
+    new CallbackGoogleAuth()
+      .execute(this.service)(req, res, next)
       .catch((error) => this.handleError(res, error));
   };
 
