@@ -13,7 +13,10 @@ export class RegisterUserDto implements UserDto {
     try {
       if (username === undefined || username === "")
         return ["Username is not specified"];
-      if (!regularExps.email.exec(email)) return ["Invalid email"];
+      if (!regularExps.email.exec(email)) {
+        console.log(email);
+        return ["Invalid email"];
+      }
       if (password.length < 8)
         return ["Password is must be at least 8 characters"];
       return [undefined, new RegisterUserDto(username, email, password)];

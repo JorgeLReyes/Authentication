@@ -1,0 +1,26 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Document
+  body 
+    .container
+      h1 Redirecting...
+      p Redirecting to #{redirect}...
+    script.
+      const redirect = "#{redirect}";
+      const authFail = "#{authFail}";
+      const domain = "#{domain}";
+      //- window.location.href = redirect;
+      if(window.opener){
+
+        window.opener.postMessage({source:"Login",redirect, authFail},domain)
+        window.close()
+
+      }else{
+        window.location.href = redirect;
+      }
+//- const data = "#{redirect}"; // El token generado
+//-       window.opener.postMessage(data, 'http://localhost:3001'); // Envía los datos al frontend
+//-       window.close(); // Cierra la ventana emergente

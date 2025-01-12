@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import passport from "passport";
-import { CustomError } from "../../../config/error";
 
 export class RedirectToGoogleAuth {
   execute(req: Request, res: Response, next: NextFunction) {

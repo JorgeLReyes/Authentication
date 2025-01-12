@@ -12,11 +12,13 @@ export class GoogleUserDto implements UserDto {
       _json: { email },
       // photos,
     } = user;
+    // console.log(user);
+    if (email === undefined) return ["User reject permission"];
 
     try {
       return [undefined, new GoogleUserDto(displayName, email, "google")];
     } catch (error) {
-      throw ["Error format invalid Google User"];
+      return ["Error format invalid Google User"];
     }
   }
 }

@@ -2,9 +2,34 @@ doctype html
 html(lang="en")
   head
     meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Document
-  body 
-    a(href="/api/auth/register-google") REGISTRARSE CON GOOGLE
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Google Authentication Example
+  body
+    button(id="register") REGISTRARSE CON GOOGLE
     br
-    a(href="/api/auth/login-google") LOGEARSE CON GOOGLE
+    button(id="login") LOGEARSE CON GOOGLE
+
+    script.
+      const loggin = document.getElementById("login");
+      const register = document.getElementById("register");
+      let popup;
+      loggin.addEventListener("click", () => {
+        popup = window.open("/api/auth/login-google", "Login", "width=500,height=600");
+      });
+
+      register.addEventListener("click", () => {
+        popup = window.open("/api/auth/register-google", "Register", "width=500,height=600");
+      });
+
+      window.addEventListener(
+        "message",
+        (event) => {
+        if (event.origin === " https://d802-2806-104e-3-2cf5-b85-92b0-d692-5ce1.ngrok-free.app" && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
+          console.log(typeof event.data?.redirect)
+          !event.data?.authFail && (window.location.href=event.data.redirect)
+        };
+
+      },
+      false,
+      );
+

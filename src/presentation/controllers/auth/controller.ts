@@ -15,6 +15,7 @@ export class AuthController {
   ) {}
 
   private handleError = (res: Response, error: unknown) => {
+    console.log(error);
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({
         error: error.message,
@@ -23,6 +24,7 @@ export class AuthController {
     res.status(500).json({ error: `Internal server error: ${error}` });
   };
   registerUser = (req: Request, res: Response) => {
+    console.log(req.body);
     new CreateUser(this.repository, req.body)
       .execute()
       .then((user) => res.json(user))
@@ -61,5 +63,11 @@ export class AuthController {
 
   logoutUser = (req: Request, res: Response) => {
     res.clearCookie("access_token").json({ msg: "logged out" });
+  };
+
+  session = (req: Request, res: Response) => {
+    console.log(req.session);
+    console.log(req.user);
+    res.json({ auth: (<any>req.session).auth });
   };
 }

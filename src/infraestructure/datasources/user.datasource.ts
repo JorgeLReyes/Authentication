@@ -23,6 +23,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
       }
       console.log(userExists);
       const { password, ...userInfo } = registerUserDto;
+      console.log(userInfo);
       const user = await prisma.user.create({
         data: {
           ...userInfo,
@@ -32,7 +33,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
 
       return user;
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       throw error;
     }
   }

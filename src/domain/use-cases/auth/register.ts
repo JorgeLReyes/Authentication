@@ -8,6 +8,7 @@ export class CreateUser {
   constructor(private repository: AuthRepository, private data: RequestBody) {}
   async execute() {
     const [error, dataDto] = RegisterUserDto.create(this.data);
+    console.log(error, dataDto);
     if (error) throw CustomError.badRequest(error);
 
     const user = await this.repository.create(dataDto!);

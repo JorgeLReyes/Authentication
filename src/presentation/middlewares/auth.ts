@@ -3,13 +3,16 @@ import { JWTAdapter } from "../../config/jwt";
 
 export class AuthMiddleware {
   static async hasToken(req: Request, res: Response, next: NextFunction) {
-    const token: string = req.cookies.access_token;
+    const token = req.cookies.access_token;
+    console.log(token);
     if (token) {
       try {
         const accessToken = token.split(" ")[1] || "";
         const data = await JWTAdapter.verifyToken(accessToken);
+        console.log(data);
         req.body.session = { user: data };
       } catch (error) {
+        // console.log(error);
         res.status(500).json({ error: "Internal server error" });
         return;
       }
@@ -17,7 +20,8 @@ export class AuthMiddleware {
     next();
   }
   static async validateJWT(req: Request, res: Response, next: NextFunction) {
-    const token: string = req.cookies.access_token;
+    console.log(req.cookies.access_token);
+    const token = req.cookies.access_token;
     if (!token) {
       res.status(403).json({ error: "Access not authorized" });
       return;

@@ -47,7 +47,7 @@ html(lang="en")
         border: 1px solid #ccc;
         border-radius: 4px;
       }
-      button {
+      button,a {
         width: 100%;
         padding: 10px;
         background-color: #28a745;
@@ -59,6 +59,9 @@ html(lang="en")
       }
       button:hover {
         background-color: #218838;
+      }
+      a{
+        text-decoration: none;
       }
 
   body
@@ -72,23 +75,30 @@ html(lang="en")
         .form-container
           form#login-form
             h2 Login
-            label(for="login-username") Username
-            input#login-username(type="text" name="username" required)
+            label(for="login-username") Email
+            input#login-username(type="text" name="email" required)
             label(for="login-password") Password
             input#login-password(type="text" name="password" required)
             button(type="submit") Login
+            br
+            br
+            button(id="login" type="button") GOOGLE
             span
 
         .form-container
           form#register-form
             h2 Register
-            label(for="register-username") Username
-            input#register-username(type="text" name="username" required)
+            label(for="register-username") Email
+            input#register-username(type="text" name="email" required)
             label(for="register-password") Password
             input#register-password(type="text" name="password" required)
             label(for="register-confirm-password") Confirm Password
             input#register-confirm-password(type="text" name="confirm-password" required)
             button(type="submit") Register
+            br
+            br
+            //- a(href="/api/auth/register-google") GOOGLE            
+            button(id="register" type="button") GOOGLE
             span
 
     script.
@@ -101,19 +111,19 @@ html(lang="en")
 
       loginForm?.addEventListener('submit', (e) => {
         e.preventDefault();
-        const username = $('#login-username').value;
+        const email = $('#login-username').value;
         const password = $('#login-password').value;
-        fetch('/login', {
+        fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ email, password, username:"Generic" }),
         })
         .then((res) => {
           if (res.ok) {
             loginSpan.innerText = 'Sesión iniciada... Entrando...';
             loginSpan.style.color = 'green';
             setTimeout(() => {
-              window.location.href = '/protected';
+              window.location.href = '/api/auth/protected';
             }, 2000);
           } else {
             loginSpan.innerText = 'Error al iniciar sesión';
@@ -124,17 +134,17 @@ html(lang="en")
 
       registerForm?.addEventListener('submit', (e) => {
         e.preventDefault();
-        const username = $('#register-username').value;
+        const email = $('#register-username').value;
         const password = $('#register-password').value;
         const confirmPassword = $('#register-confirm-password').value;
         if (password !== confirmPassword) {
           alert('Passwords do not match');
           return;
         }
-        fetch('/register', {
+        fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ email, password, username:`Generic ${Date.now()}`}),
         })
         .then((res) => {
           if (res.ok) {
@@ -152,7 +162,7 @@ html(lang="en")
 
       logoutButton?.addEventListener('click', (e) => {
         e.preventDefault();
-        fetch('/logout', {
+        fetch('/api/auth/logout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         })
@@ -160,3 +170,25 @@ html(lang="en")
           window.location.href = '/';
         });
       });
+      const loggin = document.getElementById("login");
+      const register = document.getElementById("register");
+      let popup;
+      loggin.addEventListener("click", () => {
+        popup = window.open("/api/auth/login-google", "Login", "width=500,height=600");
+      });
+
+      register.addEventListener("click", () => {
+        popup = window.open("/api/auth/register-google", "Register", "width=500,height=600");
+      });
+
+      window.addEventListener(
+        "message",
+        (event) => {
+        if (event.origin === "https://d802-2806-104e-3-2cf5-b85-92b0-d692-5ce1.ngrok-free.app" && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
+          console.log(event.data)
+          !event.data?.authFail && (window.location.reload())
+        };
+
+      },
+      false,
+      );

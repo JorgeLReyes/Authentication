@@ -18,12 +18,11 @@ export class GoogleAuthService {
   }
 
   async handleUserProfile<T>(option: string, googleUserDto: GoogleUserDto) {
-    console.log(option, googleUserDto);
     if (option === "login") {
-      return await (<T>this.login(googleUserDto)); // Login
+      return await (<T>this.login(googleUserDto));
     }
     if (option === "register") {
-      return await (<T>this.register(googleUserDto)); // Registro
+      return await (<T>this.register(googleUserDto));
     }
 
     throw CustomError.internalServer("Option not supported");

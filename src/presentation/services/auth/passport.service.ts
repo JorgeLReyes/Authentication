@@ -22,23 +22,33 @@ export class PassportAuthService {
         {
           clientID: envs.GOOGLE_CLIENT_ID,
           clientSecret: envs.GOOGLE_CLIENT_SECRET,
-          callbackURL: `${envs.GOOGLE_CALLBACK}`,
+          callbackURL: `${envs.DOMAIN}${envs.GOOGLE_CALLBACK}`,
         },
         async (accessToken, refreshToken, profile, cb) => {
           const [error, googleUserDto] = GoogleUserDto.create(
             profile as GoogleUser
           );
-
-          if (error) throw CustomError.internalServer(error);
           try {
+            if (error) throw CustomError.internalServer(error);
             return cb(null, googleUserDto);
           } catch (e) {
             console.log(e);
-            return cb(true);
+            return cb(error);
           }
         }
       )
     );
+
+    // passport.serializeUser((user, done) => {
+    //   console.log({ user });
+
+    //   done(null, user);
+    // });
+
+    // passport.deserializeUser((user, done) => {
+    //   console.log({ user });
+    //   done(null, user!);
+    // });
   }
 
   public static getInstance() {

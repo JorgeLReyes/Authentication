@@ -8,4 +8,5 @@ export const envs = {
   GOOGLE_CLIENT_ID: env.get("GOOGLE_CLIENT_ID").required().asString(),
   GOOGLE_CLIENT_SECRET: env.get("GOOGLE_CLIENT_SECRET").required().asString(),
   GOOGLE_CALLBACK: env.get("GOOGLE_CALLBACK").required().asString(),
+  DOMAIN: env.get("DOMAIN").required().asString(),
 };
