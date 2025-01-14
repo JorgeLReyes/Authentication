@@ -19,6 +19,7 @@ html(lang="en")
       }
       .container {
         display: flex;
+        height: 100%;
         flex-direction: column;
         align-items: center;
       }
@@ -117,18 +118,25 @@ html(lang="en")
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, username:"Generic" }),
-        })
+        }).then((res)=>{
+          console.log(res)
+          return res.json()})
         .then((res) => {
-          if (res.ok) {
+          console.log(res)
+          if (res.error) {throw res.error}
             loginSpan.innerText = 'Sesión iniciada... Entrando...';
             loginSpan.style.color = 'green';
-            setTimeout(() => {
-              window.location.href = '/api/auth/protected';
-            }, 2000);
-          } else {
-            loginSpan.innerText = 'Error al iniciar sesión';
-            loginSpan.style.color = 'red';
-          }
+            //- setTimeout(() => {
+            //-   window.location.href = '/api/auth/protected';
+            //- }, 2000);
+            //- } else {
+            //-   loginSpan.innerText = 'Error al iniciar sesión';
+            //-   loginSpan.style.color = 'red';
+            //- }
+        }).catch(error=>{
+          console.log(error);
+          loginSpan.innerText = 'Error al iniciar sesión';
+          loginSpan.style.color = 'red';
         });
       });
 
@@ -145,18 +153,17 @@ html(lang="en")
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, username:`Generic ${Date.now()}`}),
-        })
+        }).then((res)=>{
+          console.log(res)
+          return res.json()})
         .then((res) => {
-          if (res.ok) {
+          if (res.error) {throw res.error}
             registerSpan.innerText = 'Usuario registrado. Entrando...';
             registerSpan.style.color = 'green';
-            setTimeout(() => {
-              window.location.href = '/protected';
-            }, 2000);
-          } else {
-            registerSpan.innerText = 'Error al registrar usuario';
-            registerSpan.style.color = 'red';
-          }
+        }).catch(error=>{
+          console.log(error);
+          registerSpan.innerText = 'Error al registrar usuario';
+          registerSpan.style.color = 'red';
         });
       });
 
@@ -174,17 +181,17 @@ html(lang="en")
       const register = document.getElementById("register");
       let popup;
       loggin.addEventListener("click", () => {
-        popup = window.open("/api/auth/login-google", "Login", "width=500,height=600");
+        popup = window.open("/api/auth/google/login", "Login", "width=500,height=600");
       });
 
       register.addEventListener("click", () => {
-        popup = window.open("/api/auth/register-google", "Register", "width=500,height=600");
+        popup = window.open("/api/auth/google/register", "Register", "width=500,height=600");
       });
 
       window.addEventListener(
         "message",
         (event) => {
-        if (event.origin === "https://d802-2806-104e-3-2cf5-b85-92b0-d692-5ce1.ngrok-free.app" && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
+        if (event.origin === "https://dbd5-2806-104e-3-6574-4b6-9d71-7990-ee3.ngrok-free.app" && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
           console.log(event.data)
           !event.data?.authFail && (window.location.reload())
         };

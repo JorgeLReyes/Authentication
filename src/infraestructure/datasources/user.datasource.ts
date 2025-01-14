@@ -6,7 +6,6 @@ import type { UserDto } from "../../types";
 
 export class AuthDatasourceImpl implements AuthDatasource {
   async findUser(email: string) {
-    console.log(email);
     const userExists = await prisma.user.findUnique({
       where: { email },
     });
@@ -18,12 +17,9 @@ export class AuthDatasourceImpl implements AuthDatasource {
     try {
       const userExists = await this.findUser(registerUserDto.email!);
       if (userExists) {
-        console.log("User exists");
-        throw CustomError.badRequest("Don't want to create");
+        throw CustomError.conflic("This email is already registered");
       }
-      console.log(userExists);
       const { password, ...userInfo } = registerUserDto;
-      console.log(userInfo);
       const user = await prisma.user.create({
         data: {
           ...userInfo,
@@ -33,20 +29,31 @@ export class AuthDatasourceImpl implements AuthDatasource {
 
       return user;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
   async login(loginUserDto: UserDto) {
-    const { email, password = "" } = loginUserDto;
+    const { email, password, provider } = loginUserDto;
     const user = await this.findUser(email);
 
     if (!user) {
-      throw CustomError.badRequest("User already exists");
+      throw CustomError.badRequest("User doesn't exist");
     }
-    console.log(user);
+
+    if (user.provider && password) {
+      throw CustomError.conflic(
+        "This email is associated with an external provider (OAuth). Please use 'Sign in with [options]"
+      );
+    }
+
+    if (provider && user.password) {
+      throw CustomError.conflic(
+        "This email not is associated with an external provider."
+      );
+    }
+
     if (
-      !user.provider &&
+      password &&
       !(await BcryptAdapter.compare({ password, hash: user.password! }))
     ) {
       throw CustomError.badRequest(
@@ -54,6 +61,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
       );
     }
 
+    console.log(user);
     return user;
   }
 }

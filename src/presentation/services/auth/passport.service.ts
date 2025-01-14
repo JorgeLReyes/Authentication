@@ -6,17 +6,7 @@ import type { GoogleUser } from "../../../types";
 import { CustomError } from "../../../config/error";
 
 export class PassportAuthService {
-  private static instance: PassportAuthService;
-  private strategyRegistered = false;
-
-  private constructor() {
-    if (!this.strategyRegistered) {
-      this.strategyRegistered = true;
-      this.strategyLogin();
-    }
-  }
-
-  private strategyLogin() {
+  static strategyWithGoogle() {
     passport.use(
       new GoogleStrategy(
         {
@@ -49,12 +39,5 @@ export class PassportAuthService {
     //   console.log({ user });
     //   done(null, user!);
     // });
-  }
-
-  public static getInstance() {
-    if (!PassportAuthService.instance) {
-      return (PassportAuthService.instance = new PassportAuthService());
-    }
-    return PassportAuthService.instance;
   }
 }

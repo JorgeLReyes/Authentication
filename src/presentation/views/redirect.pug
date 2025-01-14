@@ -12,10 +12,11 @@ html(lang="en")
       const redirect = "#{redirect}";
       const authFail = "#{authFail}";
       const domain = "#{domain}";
+      const error = "#{error}";
       //- window.location.href = redirect;
       if(window.opener){
 
-        window.opener.postMessage({source:"Login",redirect, authFail},domain)
+        window.opener.postMessage({source:"Login",redirect, authFail, error},domain)
         window.close()
 
       }else{

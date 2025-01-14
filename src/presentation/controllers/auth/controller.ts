@@ -5,7 +5,7 @@ import { CustomError } from "../../../config/error";
 import { LoginUser } from "../../../domain/use-cases/auth/login";
 import { configCookies } from "../../../config/cookies";
 import { RedirectToGoogleAuth } from "../../../domain/use-cases/auth/redirect-google-auth";
-import { CallbackGoogleAuth } from "../../../domain/use-cases/auth/callback-google-auth";
+import { HandleGoogleAuthCallback } from "../../../domain/use-cases/auth/callback-google-auth";
 import { GoogleAuthService } from "../../services/auth/google.service";
 
 export class AuthController {
@@ -23,7 +23,7 @@ export class AuthController {
     }
     res.status(500).json({ error: `Internal server error: ${error}` });
   };
-  registerUser = (req: Request, res: Response) => {
+  registerWithCredentials = (req: Request, res: Response) => {
     console.log(req.body);
     new CreateUser(this.repository, req.body)
       .execute()
@@ -31,7 +31,7 @@ export class AuthController {
       .catch((error) => this.handleError(res, error));
   };
 
-  loginUser = (req: Request, res: Response) => {
+  loginWithCredentials = (req: Request, res: Response) => {
     new LoginUser(this.repository, req.body)
       .execute()
       .then((user) => {
@@ -41,33 +41,35 @@ export class AuthController {
       .catch((error) => this.handleError(res, error));
   };
 
-  loginGoogle = (req: Request, res: Response, next: NextFunction) => {
+  loginWithGoogle = (req: Request, res: Response, next: NextFunction) => {
     res.cookie("x-strategy", "login");
-    this.redirectToGoogle(req, res, next);
+    this.initiateGoogleRedirect(req, res, next);
   };
 
-  registerGoogle = (req: Request, res: Response, next: NextFunction) => {
+  registerWithGoogle = (req: Request, res: Response, next: NextFunction) => {
     res.cookie("x-strategy", "register");
-    this.redirectToGoogle(req, res, next);
+    this.initiateGoogleRedirect(req, res, next);
   };
 
-  redirectToGoogle = (req: Request, res: Response, next: NextFunction) => {
+  initiateGoogleRedirect = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     new RedirectToGoogleAuth().execute(req, res, next);
   };
 
-  callbackGoogle = (req: Request, res: Response, next: NextFunction) => {
-    new CallbackGoogleAuth()
+  processGoogleAuthCallback = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    new HandleGoogleAuthCallback()
       .execute(this.service)(req, res, next)
       .catch((error) => this.handleError(res, error));
   };
 
-  logoutUser = (req: Request, res: Response) => {
+  logout = (req: Request, res: Response) => {
     res.clearCookie("access_token").json({ msg: "logged out" });
-  };
-
-  session = (req: Request, res: Response) => {
-    console.log(req.session);
-    console.log(req.user);
-    res.json({ auth: (<any>req.session).auth });
   };
 }

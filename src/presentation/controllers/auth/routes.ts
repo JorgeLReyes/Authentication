@@ -14,18 +14,17 @@ export class AuthRoutes {
     const serviceGoogle = new GoogleAuthService(repository);
     const controller = new AuthController(repository, serviceGoogle);
 
-    PassportAuthService.getInstance();
+    PassportAuthService.strategyWithGoogle();
 
     // router.get("/google", controller.redirectToGoogle);
-    router.route("/google/cb").get(controller.callbackGoogle);
-    router.get("/login-google", controller.loginGoogle);
-    router.get("/register-google", controller.registerGoogle);
+    router.route("/google/cb").get(controller.processGoogleAuthCallback);
+    router.get("/google/login", controller.loginWithGoogle);
+    router.get("/google/register", controller.registerWithGoogle);
 
-    router.post("/login", controller.loginUser);
-    router.post("/register", controller.registerUser);
-    router.get("/register", (req, res) => res.render("google"));
-    router.post("/logout", controller.logoutUser);
-    router.get("/session", controller.session);
+    router.post("/login", controller.loginWithCredentials);
+    router.post("/register", controller.registerWithCredentials);
+    // router.get("/register", (req, res) => res.render("google"));
+    router.post("/logout", controller.logout);
     router.get("/protected", AuthMiddleware.validateJWT, (req, res) => {
       res.render("protected", req.body.session?.user);
     });
