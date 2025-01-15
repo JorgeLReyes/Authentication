@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import cors from "cors";
 import { envs } from "../config/envs";
+import session from "express-session";
 
 export class Server {
   public app = express();
@@ -22,20 +23,21 @@ export class Server {
     );
     this.app.use(express.json());
     this.app.use(cookieParser());
-    // this.app.use(
-    //   session({
-    //     secret: "your-secret-key",
-    //     resave: false,
-    //     saveUninitialized: true,
-    // cookie: { httpOnly: true },
-    //   })
-    // );
+    this.app.use(
+      session({
+        secret: envs.SEED_SESSION,
+        resave: false,
+        saveUninitialized: true,
+      })
+    );
     this.app.use(passport.initialize());
-    // this.app.use(passport.session());
+    this.app.use(passport.session());
+    passport.serializeUser((user, done) => done(null, user));
+    passport.deserializeUser((user, done) => done(null, user as any));
 
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(this.routes);
-    this.app.listen(this.port, () => {
+    this.serverListener = this.app.listen(this.port, () => {
       console.log(`Server is running on port ${this.port}`);
     });
   }

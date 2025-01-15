@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { AuthRoutes } from "../controllers/auth/routes";
-import { AuthMiddleware } from "../middlewares/auth";
+import { AuthRoutes } from "../controllers/auth/auth.routes";
+import { AuthMiddleware } from "../middlewares/auth.middleware";
 
 export class AppRouter {
   static get routes(): Router {

@@ -4,11 +4,14 @@ import { UserDto } from "../../types";
 
 export class AuthRepositoryImpl implements AuthRepository {
   constructor(private authDatasource: AuthDatasource) {}
+  async findUserByEmail(email: string) {
+    return this.authDatasource.findUserByEmail(email);
+  }
 
   async create(registerUserDto: UserDto) {
     return this.authDatasource.create(registerUserDto);
   }
-  login(loginUserDto: UserDto) {
+  async login(loginUserDto: UserDto) {
     return this.authDatasource.login(loginUserDto);
   }
 }

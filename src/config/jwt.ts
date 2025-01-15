@@ -3,16 +3,16 @@ import { envs } from "./envs";
 
 interface JWT {
   payload: { [key: string]: any };
-  expiresIn?: string;
+  expiresIn?: string | number;
 }
 
 const SEED = envs.SEED;
 
 export class JWTAdapter {
-  static signToken = ({ payload, expiresIn = "1h" }: JWT): Promise<any> => {
+  static signToken = ({ payload, expiresIn = "15m" }: JWT): Promise<any> => {
     return new Promise((resolve) =>
       jwt.sign(payload, SEED, { expiresIn }, (err, token) => {
-        if (err) return Promise.resolve(null);
+        if (err) return resolve(null);
         return resolve(token);
       })
     );
@@ -21,7 +21,10 @@ export class JWTAdapter {
   static verifyToken = (token: string) => {
     return new Promise((resolve) => {
       jwt.verify(token, SEED, (err, payload) => {
-        if (err) return Promise.resolve(null);
+        if (err) {
+          console.log(err);
+          return resolve(null);
+        }
         return resolve(payload);
       });
     });

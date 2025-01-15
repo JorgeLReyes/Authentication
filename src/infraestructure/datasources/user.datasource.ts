@@ -5,7 +5,7 @@ import { AuthDatasource } from "../../domain/datasources/datasource";
 import type { UserDto } from "../../types";
 
 export class AuthDatasourceImpl implements AuthDatasource {
-  async findUser(email: string) {
+  async findUserByEmail(email: string) {
     const userExists = await prisma.user.findUnique({
       where: { email },
     });
@@ -15,7 +15,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
 
   async create(registerUserDto: UserDto) {
     try {
-      const userExists = await this.findUser(registerUserDto.email!);
+      const userExists = await this.findUserByEmail(registerUserDto.email!);
       if (userExists) {
         throw CustomError.conflic("This email is already registered");
       }
@@ -34,7 +34,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
   }
   async login(loginUserDto: UserDto) {
     const { email, password, provider } = loginUserDto;
-    const user = await this.findUser(email);
+    const user = await this.findUserByEmail(email);
 
     if (!user) {
       throw CustomError.badRequest("User doesn't exist");

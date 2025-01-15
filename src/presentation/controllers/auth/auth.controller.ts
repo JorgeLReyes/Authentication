@@ -1,21 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import { CreateUser } from "../../../domain/use-cases/auth/register";
+import { CreateUser } from "../../../domain/use-cases/auth/register.use-case";
 import { AuthRepository } from "../../../domain/repositories/user.repository";
 import { CustomError } from "../../../config/error";
-import { LoginUser } from "../../../domain/use-cases/auth/login";
+import { LoginUser } from "../../../domain/use-cases/auth/login.use-case";
 import { configCookies } from "../../../config/cookies";
-import { RedirectToGoogleAuth } from "../../../domain/use-cases/auth/redirect-google-auth";
-import { HandleGoogleAuthCallback } from "../../../domain/use-cases/auth/callback-google-auth";
-import { GoogleAuthService } from "../../services/auth/google.service";
+import { PassportAuthService } from "../../services/auth/passport.service";
+import { envs } from "../../../config/envs";
+import { AuthWithProvider } from "../../../domain/use-cases/auth/auth-provider.use-case";
 
 export class AuthController {
   constructor(
     private repository: AuthRepository,
-    private service: GoogleAuthService
+    private service: typeof PassportAuthService
   ) {}
 
   private handleError = (res: Response, error: unknown) => {
-    console.log(error);
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({
         error: error.message,
@@ -56,7 +55,7 @@ export class AuthController {
     res: Response,
     next: NextFunction
   ) => {
-    new RedirectToGoogleAuth().execute(req, res, next);
+    this.service.redirectToGoogle()(req, res, next);
   };
 
   processGoogleAuthCallback = (
@@ -64,9 +63,30 @@ export class AuthController {
     res: Response,
     next: NextFunction
   ) => {
-    new HandleGoogleAuthCallback()
-      .execute(this.service)(req, res, next)
-      .catch((error) => this.handleError(res, error));
+    this.service.authenticateWithGoogle(req, res, next);
+  };
+
+  sucessWithGoogle = (req: Request, res: Response) => {
+    const strategy = req.cookies["x-strategy"];
+    new AuthWithProvider(this.repository)
+      .handleValidateInformation(strategy, req.user)
+      .then((data: { error?: string; token?: string; [key: string]: any }) => {
+        const { error, token, ...rest } = data;
+        if (error) return res.render("redirect", data);
+
+        res
+          .cookie("access_token", token, configCookies)
+          .render("redirect", rest);
+      });
+  };
+
+  failWithGoogle = (req: Request, res: Response) => {
+    res.render("redirect", {
+      redirect: "/",
+      domain: envs.DOMAIN,
+      authFail: true,
+      error: "Authentication failed",
+    });
   };
 
   logout = (req: Request, res: Response) => {

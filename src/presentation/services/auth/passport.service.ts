@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { envs } from "../../../config/envs";
 import { GoogleUserDto } from "../../../domain/dtos/auth/google-user.dto";
 import type { GoogleUser } from "../../../types";
-import { CustomError } from "../../../config/error";
+import { NextFunction, Request, Response } from "express";
 
 export class PassportAuthService {
   static strategyWithGoogle() {
@@ -18,26 +18,25 @@ export class PassportAuthService {
           const [error, googleUserDto] = GoogleUserDto.create(
             profile as GoogleUser
           );
-          try {
-            if (error) throw CustomError.internalServer(error);
-            return cb(null, googleUserDto);
-          } catch (e) {
-            console.log(e);
-            return cb(error);
-          }
+          if (error) return cb(error);
+          return cb(null, googleUserDto);
         }
       )
     );
-
-    // passport.serializeUser((user, done) => {
-    //   console.log({ user });
-
-    //   done(null, user);
-    // });
-
-    // passport.deserializeUser((user, done) => {
-    //   console.log({ user });
-    //   done(null, user!);
-    // });
   }
+
+  static authenticateWithGoogle = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    passport.authenticate("google", {
+      // session: false,
+      successRedirect: "/api/auth/google/sucess",
+      failureRedirect: "/api/auth/google/fail",
+    })(req, res, next);
+  };
+  static redirectToGoogle = () => {
+    return passport.authenticate("google", { scope: ["profile", "email"] });
+  };
 }

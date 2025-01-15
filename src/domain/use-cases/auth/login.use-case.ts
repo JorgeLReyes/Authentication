@@ -12,14 +12,15 @@ export class LoginUser {
     if (error) throw CustomError.badRequest(error);
 
     const user = await this.repository.login(dataDto!);
-    const { username, id } = fromUser(user);
+    const { email, id, username } = fromUser(user);
     return {
-      user: { username },
+      user: { email },
       token:
         "Bearer " +
         (await JWTAdapter.signToken({
           payload: {
             id,
+            email,
             username,
           },
         })),

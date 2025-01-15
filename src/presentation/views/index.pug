@@ -194,6 +194,17 @@ html(lang="en")
         if (event.origin === "https://dbd5-2806-104e-3-6574-4b6-9d71-7990-ee3.ngrok-free.app" && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
           console.log(event.data)
           !event.data?.authFail && (window.location.reload())
+          if(event.data?.authFail)
+          {
+            if(event.data.source==="Login"){
+              loginSpan.innerText = event.data.error;
+              loginSpan.style.color ='red';
+            }else{
+              registerSpan.innerText = event.data.error;
+              registerSpan.style.color ='red';
+            }
+          }
+
         };
 
       },
