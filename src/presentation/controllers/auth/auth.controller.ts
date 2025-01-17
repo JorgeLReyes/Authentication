@@ -22,8 +22,8 @@ export class AuthController {
     }
     res.status(500).json({ error: `Internal server error: ${error}` });
   };
+
   registerWithCredentials = (req: Request, res: Response) => {
-    console.log(req.body);
     new CreateUser(this.repository, req.body)
       .execute()
       .then((user) => res.json(user))
@@ -34,8 +34,19 @@ export class AuthController {
     new LoginUser(this.repository, req.body)
       .execute()
       .then((user) => {
-        const { token } = user;
-        res.cookie("access_token", token, configCookies).json(user);
+        const {
+          tokens: { accessToken, refreshToken },
+        } = user;
+        res
+          .cookie("access_token", accessToken, {
+            ...configCookies,
+            maxAge: envs.ACCESS_COOKIE_EXPIRATION,
+          })
+          .cookie("refresh_token", refreshToken, {
+            ...configCookies,
+            maxAge: envs.REFRESH_COOKIE_EXPIRATION,
+          })
+          .json(user);
       })
       .catch((error) => this.handleError(res, error));
   };
@@ -70,13 +81,24 @@ export class AuthController {
     const strategy = req.cookies["x-strategy"];
     new AuthWithProvider(this.repository)
       .handleValidateInformation(strategy, req.user)
-      .then((data: { error?: string; token?: string; [key: string]: any }) => {
-        const { error, token, ...rest } = data;
+      .then((data) => {
+        const { error, tokens, ...rest } = data;
         if (error) return res.render("redirect", data);
+        const { accessToken, refreshToken } = tokens!;
 
-        res
-          .cookie("access_token", token, configCookies)
-          .render("redirect", rest);
+        if (strategy === "login") {
+          res
+            .cookie("access_token", accessToken, {
+              ...configCookies,
+              maxAge: envs.ACCESS_COOKIE_EXPIRATION,
+            })
+            .cookie("refresh_token", refreshToken, {
+              ...configCookies,
+              maxAge: envs.REFRESH_COOKIE_EXPIRATION,
+            });
+        }
+        res.clearCookie("x-strategy");
+        res.render("redirect", rest);
       });
   };
 
@@ -90,6 +112,9 @@ export class AuthController {
   };
 
   logout = (req: Request, res: Response) => {
-    res.clearCookie("access_token").json({ msg: "logged out" });
+    res
+      .clearCookie("access_token")
+      .clearCookie("refresh_token")
+      .json({ msg: "logged out" });
   };
 }

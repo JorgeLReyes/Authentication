@@ -1,4 +1,4 @@
-import { AuthDatasource } from "../../domain/datasources/datasource";
+import { AuthDatasource } from "../../domain/datasources/user.datasource";
 import { AuthRepository } from "../../domain/repositories/user.repository";
 import { UserDto } from "../../types";
 

@@ -23,8 +23,12 @@ export class AuthRoutes {
     router.post("/login", controller.loginWithCredentials);
     router.post("/register", controller.registerWithCredentials);
 
-    router.post("/logout", controller.logout);
-    router.get("/protected", AuthMiddleware.validateJWT, (req, res) => {
+    router.post(
+      "/logout",
+      [AuthMiddleware.validateToken, AuthMiddleware.revokeToken],
+      controller.logout
+    );
+    router.get("/protected", AuthMiddleware.validateToken, (req, res) => {
       res.render("protected", req.body.session?.user);
     });
     return router;

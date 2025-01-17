@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prismaClient";
 import { CustomError } from "../../config/error";
 import { BcryptAdapter } from "../../config/bcrypt";
-import { AuthDatasource } from "../../domain/datasources/datasource";
+import { AuthDatasource } from "../../domain/datasources/user.datasource";
 import type { UserDto } from "../../types";
 
 export class AuthDatasourceImpl implements AuthDatasource {
@@ -9,7 +9,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
     const userExists = await prisma.user.findUnique({
       where: { email },
     });
-
+    console.log(userExists);
     return userExists;
   }
 
@@ -61,7 +61,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
       );
     }
 
-    console.log(user);
+    // console.log(user);
     return user;
   }
 }

@@ -34,22 +34,35 @@ export class AuthWithProvider {
     throw CustomError.internalServer("Option not supported");
   }
 
-  handleValidateInformation = (strategyAuth: string, informationUser: any) => {
+  handleValidateInformation = (
+    strategyAuth: string,
+    informationUser: any
+  ): Promise<{
+    domain: string;
+    error?: any;
+    tokens?: { accessToken: string; refreshToken: string };
+    redirect?: string;
+    authFail?: boolean;
+  }> => {
     return this.handleUserProfile<User>(strategyAuth, informationUser)
       .then(async (user) => {
-        const { email, id, username } = user!;
-        const token =
-          "Bearer " +
-          (await JWTAdapter.signToken({
-            payload: {
-              id,
-              email,
-              username,
-            },
-          }));
+        const { email, username } = user!;
+
+        const tokens = {
+          accessToken: await JWTAdapter.signToken({
+            payload: { email, username },
+            expiresIn: envs.ACCESS_TOKEN_EXPIRATION,
+            SEED: JWTAdapter.ACCESS_TOKEN,
+          }),
+          refreshToken: await JWTAdapter.signToken({
+            payload: { email, username },
+            expiresIn: envs.REFRESH_TOKEN_EXPIRATION,
+            SEED: JWTAdapter.REFRESH_TOKEN,
+          }),
+        };
 
         return {
-          token,
+          tokens,
           redirect: "/",
           domain: envs.DOMAIN,
         };

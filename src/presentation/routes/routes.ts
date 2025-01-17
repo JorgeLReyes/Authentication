@@ -7,6 +7,7 @@ export class AppRouter {
     const router = Router();
     router.get("/", AuthMiddleware.hasToken, (req, res): any => {
       res.render("index", req.body.session?.user);
+      return;
     });
     router.use("/api/auth", AuthRoutes.routes);
     return router;
