@@ -3,26 +3,34 @@ import { envs } from "./envs";
 
 interface JWT {
   payload: { [key: string]: any };
-  expiresIn?: string;
+  expiresIn?: string | number;
+  SEED: string;
 }
 
-const SEED = envs.SEED;
-
 export class JWTAdapter {
-  static signToken = ({ payload, expiresIn = "1h" }: JWT): Promise<any> => {
+  static ACCESS_TOKEN = envs.SEED_ACCESS_TOKEN;
+  static REFRESH_TOKEN = envs.SEED_REFRESH_TOKEN;
+
+  static signToken = ({
+    payload,
+    expiresIn = "1m",
+    SEED,
+  }: JWT): Promise<any> => {
     return new Promise((resolve) =>
       jwt.sign(payload, SEED, { expiresIn }, (err, token) => {
-        if (err) return Promise.resolve(null);
+        if (err) return resolve(null);
         return resolve(token);
       })
     );
   };
 
-  static verifyToken = (token: string) => {
+  static verifyToken = <T>(token: string, SEED: string): Promise<T | null> => {
     return new Promise((resolve) => {
       jwt.verify(token, SEED, (err, payload) => {
-        if (err) return Promise.resolve(null);
-        return resolve(payload);
+        if (err) {
+          return resolve(null);
+        }
+        return resolve(<T>payload);
       });
     });
   };

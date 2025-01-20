@@ -1,45 +1,67 @@
 import { prisma } from "../../config/prismaClient";
 import { CustomError } from "../../config/error";
 import { BcryptAdapter } from "../../config/bcrypt";
-import { AuthDatasource } from "../../domain/datasources/datasource";
-import type { RegisterUserDto } from "../../domain/dtos/auth/register.dto";
-import type { LoginUserDto } from "../../domain/dtos/auth/login.dto";
+import { AuthDatasource } from "../../domain/datasources/user.datasource";
+import type { UserDto } from "../../types";
 
 export class AuthDatasourceImpl implements AuthDatasource {
-  async findUser(username: string) {
+  async findUserByEmail(email: string) {
     const userExists = await prisma.user.findUnique({
-      where: { username },
+      where: { email },
     });
-
+    console.log(userExists);
     return userExists;
   }
 
-  async create(registerUserDto: RegisterUserDto) {
-    const userExists = await this.findUser(registerUserDto.username);
-    if (userExists) {
-      throw CustomError.badRequest("Don't want to create");
+  async create(registerUserDto: UserDto) {
+    try {
+      const userExists = await this.findUserByEmail(registerUserDto.email!);
+      if (userExists) {
+        throw CustomError.conflic("This email is already registered");
+      }
+      const { password, ...userInfo } = registerUserDto;
+      const user = await prisma.user.create({
+        data: {
+          ...userInfo,
+          password: password && (await BcryptAdapter.hash(password)),
+        },
+      });
+
+      return user;
+    } catch (error) {
+      throw error;
     }
-
-    const { username, password } = registerUserDto;
-    const user = await prisma.user.create({
-      data: { username, password: await BcryptAdapter.hash(password) },
-    });
-
-    return user;
   }
-  async login(loginUserDto: LoginUserDto) {
-    const { username, password } = loginUserDto;
-    const user = await this.findUser(username);
+  async login(loginUserDto: UserDto) {
+    const { email, password, provider } = loginUserDto;
+    const user = await this.findUserByEmail(email);
 
     if (!user) {
-      throw CustomError.badRequest("User already exists");
+      throw CustomError.badRequest("User doesn't exist");
     }
 
-    if (!(await BcryptAdapter.compare({ password, hash: user.password }))) {
+    if (user.provider && password) {
+      throw CustomError.conflic(
+        "This email is associated with an external provider (OAuth). Please use 'Sign in with [options]"
+      );
+    }
+
+    if (provider && user.password) {
+      throw CustomError.conflic(
+        "This email not is associated with an external provider."
+      );
+    }
+
+    if (
+      password &&
+      !(await BcryptAdapter.compare({ password, hash: user.password! }))
+    ) {
       throw CustomError.badRequest(
         "Invalid login: username or password incorrect"
       );
     }
+
+    // console.log(user);
     return user;
   }
 }

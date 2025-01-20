@@ -1,0 +1,21 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Document
+  body 
+    .container
+      h1 Redirecting...
+      p Redirecting to #{redirect}...
+    script.
+      const redirect = "#{redirect}";
+      const authFail = "#{authFail}";
+      const domain = "#{domain}";
+      const error = "#{error}";
+      if(window.opener){
+        window.opener.postMessage({source:"Login",redirect, authFail, error},domain)
+        window.close()
+      }else{
+        window.location.href = redirect;
+      }
