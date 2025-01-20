@@ -188,10 +188,12 @@ html(lang="en")
         popup = window.open("/api/auth/google/register", "Register", "width=500,height=600");
       });
 
+      const url = ""
+
       window.addEventListener(
         "message",
         (event) => {
-        if (event.origin === "https://dbd5-2806-104e-3-6574-4b6-9d71-7990-ee3.ngrok-free.app" && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
+        if (event.origin === url && (["Login" , "Register"].includes(event.source?.name) || ["Login" , "Register"].includes(event.data?.source))) {
           console.log(event.data)
           !event.data?.authFail && (window.location.reload())
           if(event.data?.authFail)

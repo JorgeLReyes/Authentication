@@ -13,15 +13,9 @@ html(lang="en")
       const authFail = "#{authFail}";
       const domain = "#{domain}";
       const error = "#{error}";
-      //- window.location.href = redirect;
       if(window.opener){
-
         window.opener.postMessage({source:"Login",redirect, authFail, error},domain)
         window.close()
-
       }else{
         window.location.href = redirect;
       }
-//- const data = "#{redirect}"; // El token generado
-//-       window.opener.postMessage(data, 'http://localhost:3001'); // Envía los datos al frontend
-//-       window.close(); // Cierra la ventana emergente
